@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>爱弥斯的星空遗迹大冒险</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=ZCOOL+KuaiLe&family=ZCOOL+QingKe+HuangYou&display=swap" media="print" onload="this.media='all'">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div id="wrap">
+  <canvas id="game"></canvas>
+  <div id="ui">
+    <!-- HUD -->
+    <div id="hud">
+      <div class="hud-left">
+        <div class="portrait"><img id="hudPortrait" alt=""></div>
+        <div class="hud-stats">
+          <div class="row"><span class="lbl">生命</span><span class="hearts" id="hudLives"></span><span class="form" id="hudForm"></span></div>
+          <div class="row"><span class="note-ico">♪</span><b id="hudCoins">00</b><span class="sub">本关 <span id="hudGot">0/0</span></span><span class="medals" id="hudMedals">☆☆☆</span></div>
+          <div class="row prog"><span id="hudLevel">1-1</span><div class="bar"><div id="hudProg"></div><i id="hudProgDot">♪</i></div><span class="flagico">⚑</span></div>
+          <div class="row" id="hudBuffs"></div>
+        </div>
+      </div>
+      <div class="hud-right">
+        <div class="hud-box"><small>SCORE</small><b id="hudScore">0000000</b></div>
+        <div class="hud-box"><small>TIME</small><b id="hudTime">000</b></div>
+        <button class="icon-btn" id="btnMute">🔊</button>
+        <button class="icon-btn" id="btnPause">❚❚</button>
+      </div>
+      <div id="bossbar"><span id="bossName"></span><div class="bb"><div id="bossFill"></div></div></div>
+    </div>
+    <div id="toast"></div>
+    <div id="flash"></div>
+
+    <!-- 移动端虚拟按键（右下角） -->
+    <div id="touch">
+      <div class="tc">
+        <button data-k="wave" id="tcWave" class="tb small hide">波</button>
+        <button data-k="dash" class="tb dash">冲刺</button>
+        <button data-k="jump" class="tb jump">跳跃</button>
+        <button data-k="left" class="tb dir">◀</button>
+        <button data-k="right" class="tb dir">▶</button>
+      </div>
+    </div>
+
+    <!-- 标题 -->
+    <div id="title" class="screen">
+      <div class="title-skins" id="titleSkins"></div>
+      <div class="title-box">
+        <div class="title-sub">WUTHERING WAVES · AEMEATH</div>
+        <h1 class="game-title"><span>爱弥斯的</span><span class="big">星空遗迹大冒险</span></h1>
+        <div class="title-en">Aemeath's Starry Ruins Adventure</div>
+        <div class="title-btns">
+          <button class="btn primary" id="btnStart">✦ 开始冒险 ✦</button>
+          <button class="btn" id="btnTitleSelect">选择关卡</button>
+          <button class="btn" id="btnHelp">玩法说明</button>
+        </div>
+        <div class="title-tip">3 大篇章 · 30 个世界 · 300 个关卡 · 6 款猫猫爱弥斯皮肤</div>
+      </div>
+    </div>
+
+    <!-- 皮肤 -->
+    <div id="skins" class="screen">
+      <div class="panel wide">
+        <h2 class="ptitle">选择爱弥斯的形态</h2>
+        <div class="skin-list" id="skinList"></div>
+        <label class="toggle"><input type="checkbox" id="portraitToggle"> 关卡中使用原画头像（默认为 Q 版手绘）</label>
+        <div class="row-btns">
+          <button class="btn" id="btnSkinBack">返回</button>
+          <button class="btn primary" id="btnSkinOk">就决定是你了 ♪</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 选关 -->
+    <div id="select" class="screen">
+      <div class="panel wide">
+        <h2 class="ptitle">星空遗迹地图</h2>
+        <div class="sel-stats" id="selStats"></div>
+        <div class="chapter-tabs" id="chapterTabs"></div>
+        <div class="world-tabs" id="worldTabs"></div>
+        <div class="level-grid" id="levelGrid"></div>
+        <div class="row-btns">
+          <button class="btn" id="btnSelBack">返回标题</button>
+          <button class="btn" id="btnSelSkin">更换皮肤</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 关卡开场 -->
+    <div id="intro" class="screen">
+      <div class="intro-box">
+        <div class="intro-world" id="introWorld"></div>
+        <div class="intro-name" id="introName"></div>
+        <div class="intro-lives"><img id="introImg" alt=""><span id="introLives"></span></div>
+        <div class="intro-sub" id="introSub"></div>
+      </div>
+    </div>
+
+    <!-- 暂停 -->
+    <div id="pause" class="screen">
+      <div class="panel">
+        <h2 class="ptitle">暂停中 · 小憩一下</h2>
+        <div class="pause-info" id="pauseInfo"></div>
+        <div class="col-btns">
+          <button class="btn primary" id="btnResume">继续冒险</button>
+          <button class="btn" id="btnRestart">重新开始本关</button>
+          <button class="btn" id="btnMute2">🔊 声音：开</button>
+          <button class="btn" id="btnQuit">返回选关</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 通关结算 -->
+    <div id="clear" class="screen">
+      <div class="panel">
+        <div class="clear-head"><img id="clearImg" alt=""><div><h2 class="ptitle" id="clearTitle">通关！</h2><div class="clear-line" id="clearLine"></div></div></div>
+        <div class="clear-stats" id="clearStats"></div>
+        <div class="row-btns">
+          <button class="btn" id="btnClearSel">选关</button>
+          <button class="btn" id="btnReplay">再玩一次</button>
+          <button class="btn primary" id="btnNext">下一关 ▶</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 失败 -->
+    <div id="over" class="screen">
+      <div class="panel">
+        <h2 class="ptitle sad">GAME OVER</h2>
+        <div class="pause-info">爱弥斯的歌声暂时停下了……<br><span id="overInfo"></span></div>
+        <div class="col-btns">
+          <button class="btn primary" id="btnOverRetry">重新出发</button>
+          <button class="btn" id="btnOverLevel">从本关重新挑战</button>
+          <button class="btn" id="btnOverSel">返回选关</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 全通关 -->
+    <div id="win" class="screen">
+      <div class="panel wide">
+        <h2 class="ptitle">🎉 星空遗迹 · 全部通关！</h2>
+        <div class="win-imgs" id="winImgs"></div>
+        <p class="win-text">终焉之噪·无声女王被击败，三大篇章的星空遗迹重新响起了爱弥斯的歌声。<br>谢谢你陪她走完这段旅程 ♪</p>
+        <div class="pause-info" id="winStats"></div>
+        <div class="row-btns"><button class="btn primary" id="btnWinBack">返回标题</button></div>
+      </div>
+    </div>
+
+    <!-- 说明 -->
+    <div id="help" class="screen">
+      <div class="panel wide">
+        <h2 class="ptitle">玩法说明</h2>
+        <div class="help-grid">
+          <div>
+            <h3>操作</h3>
+            <p><kbd>←</kbd><kbd>→</kbd> / <kbd>A</kbd><kbd>D</kbd> 移动</p>
+            <p><kbd>空格</kbd> / <kbd>↑</kbd> 跳跃（长按跳更高，跑动中跳更远）</p>
+            <p><kbd>Shift</kbd> / <kbd>X</kbd> 冲刺（空中也可冲刺一次，冲刺可撞飞小怪）</p>
+            <p><kbd>Z</kbd> / <kbd>J</kbd> 星河形态发射声波 · <kbd>Esc</kbd> 暂停 · <kbd>M</kbd> 静音</p>
+            <p>手机：右下角虚拟按键</p>
+            <h3>道具</h3>
+            <p><b class="c1">共鸣晶核</b> 变大进入共鸣形态，可顶碎音符砖</p>
+            <p><b class="c2">星河之花</b> 星河形态，可发射弹跳声波</p>
+            <p><b class="c3">星光音符</b> 10 秒加速 · <b class="c4">回响能量</b> 短暂无敌</p>
+            <p><b class="c5">爱心音符</b> 生命 +1 · <b class="c6">奇想星花</b> 奇想时间！</p>
+          </div>
+          <div>
+            <h3>规则</h3>
+            <p>收集 <b>闪光音乐音符</b>，每 100 个奖励 1 条命</p>
+            <p>每关藏有 3 枚 <b>星声徽章</b>，挑战全收集</p>
+            <p>受伤会退回上一形态，普通形态受伤则失去 1 条命</p>
+            <p>中途点亮 <b>星灯</b>，失败后从这里继续</p>
+            <p>抓住终点旗杆越高，得分越多（顶端奖励 1UP）</p>
+            <p>连续踩怪分数翻倍，连踩 9 次奖励 1UP</p>
+            <p>每个世界第 10 关是首领战，踩头击败首领</p>
+            <p>生命归零 → 从本世界第 1 关重新出发</p>
+            <h3>怪物</h3>
+            <p>星噪团子 · 星壳龟（可踢壳）· 漂浮音符怪 · 星刺球（不能踩！）· 跳跳音叉 · 残象花 · 流星弹</p>
+          </div>
+        </div>
+        <div class="row-btns"><button class="btn primary" id="btnHelpBack">明白啦</button></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+<div id="rotate">请将手机横屏游玩 ↻</div>
+<script src="js/levels.js"></script>
+<script src="js/art.js"></script>
+<script src="js/game.js"></script>
+</body>
+</html>
